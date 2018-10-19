@@ -6,7 +6,7 @@
 
 "use strict";
 
-import * as ecc from "eosjs-ecc";
+import * as ecc from "eosjs-ecc-rn";
 import { SignatureProvider, SignatureProviderArgs } from "./eosjs-api";
 import { convertLegacyPublicKey } from "./eosjs-numeric";
 
