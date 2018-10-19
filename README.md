@@ -1,5 +1,10 @@
 ⚠️ ***Important! We have recently released a major breaking rewrite for eosjs. Be sure to lock your dependencies.*** ⚠️
 
+# eosjs-rn
+
+Library based on [eosjs](https://github.com/EOSIO/eosjs), with React Native compatibility
+
+
 If you are looking for the the previous version of `eosjs` you can [find it here](https://github.com/EOSIO/eosjs/tree/v16.0.9).
 
 # eosjs
@@ -12,14 +17,14 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### NodeJS
 
-`npm install eosjs@beta`
+`npm install eosjs-rn@beta`
 
 ## Basic Usage
 
 ### NodeJS
 
 ```js
-const eosjs = require('eosjs');
+const eosjs = require('eosjs-rn');
 const fetch = require('node-fetch');                            // node only; not needed in browsers
 const { TextDecoder, TextEncoder } = require('text-encoding');  // node, IE11 and IE Edge Browsers
 ```

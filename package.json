@@ -1,5 +1,5 @@
 {
-  "name": "eosjs",
+  "name": "eosjs-rn",
   "version": "20.0.0-beta1",
   "description": "Talk to eos API",
   "main": "dist/index.js",
@@ -20,7 +20,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/EOSIO/eosjs.git"
+    "url": "https://github.com/Game-X-Coin/eosjs-rn.git"
   },
   "dependencies": {
     "@types/jest": "^23.3.1",
