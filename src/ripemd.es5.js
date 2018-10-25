@@ -328,12 +328,8 @@ var RIPEMD160 = function () {
 			//  The message after padding consists of t 16-word blocks that
 			// are denoted with X_i[j], with 0≤i≤(t − 1) and 0≤j≤15.
 			var X = new Array(t).fill(undefined).map(function (_, i) {
-				return new Proxy(new DataView(padded, i * block_size, block_size), {
-					get: function get(block_view, j) {
-						return block_view.getUint32(j * word_size, true // Little-endian
-						);
-					}
-				});
+				var dataView = new DataView(padded, i * block_size, block_size)
+				return Array.from({ length: 16 }, (_, k) => dataView.getUint32(Number(k) * word_size, true))
 			});
 
 			//  The result of RIPEMD-160 is contained in five 32-bit words,
