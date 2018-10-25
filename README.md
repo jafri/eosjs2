@@ -17,7 +17,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### NodeJS
 
-`npm install eosjs-rn@beta`
+`npm install eosjs-rn`
 
 ## Basic Usage
 
@@ -25,7 +25,7 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
-import { Api, JsonRpc, RpcError, JsSignatureProvider } from 'eosjs';
+import { Api, JsonRpc, RpcError, JsSignatureProvider } from 'eosjs-rn';
 ```
 
 ### NodeJS
