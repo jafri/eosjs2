@@ -1,0 +1,16 @@
+.DS_Store
+.github
+node_modules
+src
+docs
+.babelrc
+.gitignore
+.gitmodules
+.travis.yml
+webpack.config.js
+typedoc.json
+tsconfig.json
+tsconfig.test.json
+tslint.json
+yarn.lock
+!src/abi.abi.json
