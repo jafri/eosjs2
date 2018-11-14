@@ -1,6 +1,6 @@
 {
   "name": "eosjs-rn",
-  "version": "20.0.0-beta2.3",
+  "version": "20.0.0-beta2.4",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
