@@ -52,7 +52,7 @@ export default class Api {
      *    * `signatureProvider`: Signs transactions
      *    * `chainId`: Identifies chain
      *    * `textEncoder`: `TextEncoder` instance to use. Pass in `null` if running in a browser
-     *    * `textDecoder`: `TextDecider` instance to use. Pass in `null` if running in a browser
+     *    * `textDecoder`: `TextDecoder` instance to use. Pass in `null` if running in a browser
      */
     constructor(args: {
         rpc: JsonRpc,
@@ -234,21 +234,20 @@ export default class Api {
             throw new Error("Required configuration or TAPOS fields are not present");
         }
 
+        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = { ...transaction, actions: await this.serializeActions(transaction.actions) };
         const serializedTransaction = this.serializeTransaction(transaction);
-        const pushTransactionArgs: PushTransactionArgs = { serializedTransaction };
+        let pushTransactionArgs: PushTransactionArgs  = { serializedTransaction, signatures: [] };
 
         if (sign) {
-            const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
             const availableKeys = await this.signatureProvider.getAvailableKeys();
             const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
-            const signatures = await this.signatureProvider.sign({
+            pushTransactionArgs = await this.signatureProvider.sign({
                 chainId: this.chainId,
                 requiredKeys,
                 serializedTransaction,
                 abis,
             });
-            pushTransactionArgs.signatures = signatures;
         }
         if (broadcast) {
             return this.pushSignedTransaction(pushTransactionArgs);

@@ -377,10 +377,16 @@ Method #2
 
 		//  The message after padding consists of t 16-word blocks that
 		// are denoted with X_i[j], with 0≤i≤(t − 1) and 0≤j≤15.
-		var X = new Array(t).fill(undefined).map(function (_, i) {
-			var dataView = new DataView(padded, i * block_size, block_size)
-			return Array.from({ length: 16 }, (_, k) => dataView.getUint32(Number(k) * word_size, true))
-		});
+		const X = (new Array(t))
+			.fill(undefined)
+			.map((_, i) => j => (
+				new DataView(
+					padded, i * block_size, block_size
+				).getUint32(
+					j * word_size,
+					true // Little-endian
+				)
+			));
 
 		//  The result of RIPEMD-160 is contained in five 32-bit words,
 		// which form the internal state of the algorithm. The final
@@ -406,7 +412,7 @@ Method #2
 						RIPEMD160.add_modulo32(
 							A,
 							RIPEMD160.f(j, B, C, D),
-							X[i][r[j]],
+							X[i](r[j]),
 							RIPEMD160.K(j)
 						),
 						s[j]
@@ -430,7 +436,7 @@ Method #2
 								CP,
 								DP
 							),
-							X[i][rP[j]],
+							X[i](rP[j]),
 							RIPEMD160.KP(j)
 						),
 						sP[j]
