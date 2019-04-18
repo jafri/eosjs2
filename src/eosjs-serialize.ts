@@ -630,8 +630,8 @@ function serializeStruct(this: Type, buffer: SerialBuffer, data: any,
     if (this.base) {
         this.base.serialize(buffer, data, state, allowExtensions);
     }
-    if (typeof data !== "object") {
-        throw new Error("expected object containing data: " + JSON.stringify(data));
+    if (typeof data !== 'object') {
+        throw new Error('expected object containing data: ' + JSON.stringify(data));
     }
     for (const field of this.fields) {
         if (field.name in data) {
