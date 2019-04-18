@@ -1,16 +1,12 @@
-.DS_Store
-.github
-node_modules
-src
-docs
-.babelrc
-.gitignore
-.gitmodules
-.travis.yml
-webpack.config.js
-typedoc.json
-tsconfig.json
-tsconfig.test.json
-tslint.json
-yarn.lock
-!src/abi.abi.json
+# Exclude all files by default
+*
+
+# Include distribution bundle but exclude test files if they are built into dist
+!dist/**
+*.test.*
+
+# Include documentation and version information in bundle
+!CONTRIBUTING.md
+
+# Include any additional source files which should be bundled
+!src/**/*.abi.json
