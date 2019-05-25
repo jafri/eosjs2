@@ -20,6 +20,9 @@ function arrayToHex(data: Uint8Array) {
 export class JsonRpc implements AuthorityProvider, AbiProvider {
     public endpoint: string;
     public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
+    public endpoints: string[];
+    public endpointIndex: number = -1
+    public maxRetries: number = 5
 
     /**
      * @param args
@@ -27,10 +30,17 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      *    * browsers: leave `null` or `undefined`
      *    * node: provide an implementation
      */
-    constructor(endpoint: string, args:
-        { fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> } = {},
+    constructor(
+        endpoint: string,
+        args: { 
+            fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> 
+        } = {},
+        endpoints?: string[]
     ) {
+        this.endpoints = endpoints;
         this.endpoint = endpoint;
+        this.nextEndpoint()
+
         if (args.fetch) {
             this.fetchBuiltin = args.fetch;
         } else {
@@ -38,8 +48,19 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         }
     }
 
+    public nextEndpoint() {
+        /**
+         * TODO add max retries
+         */
+        if (this.endpoints && this.endpoints.length) {
+          this.endpointIndex++
+          this.endpoint = this.endpoints[this.endpointIndex]
+          this.endpointIndex %= this.endpoints.length
+        }
+    }
+
     /** Post `body` to `endpoint + path`. Throws detailed error information in `RpcError` when available. */
-    public async fetch(path: string, body: any) {
+    public async fetch(path: string, body: any, currentRetries: number = 0): Promise<any> {
         let response;
         let json;
         try {
@@ -54,7 +75,8 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
             }
         } catch (e) {
             e.isFetchError = true;
-            throw e;
+            this.nextEndpoint()
+            return this.fetch(path, body, ++currentRetries)
         }
         if (!response.ok) {
             throw new RpcError(json);
