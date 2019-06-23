@@ -4,7 +4,7 @@
 // copyright defined in eosjs/LICENSE.txt
 
 const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
-
+const bs58 = require('bs58')
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -269,11 +269,11 @@ function keyToString(key: Key, suffix: string, prefix: string) {
 }
 
 /** Convert key in `s` to binary form */
-export function stringToPublicKey(s: string): Key {
+export function stringToPublicKey(s: string, prefix = 'EOS'): Key {
     if (typeof s !== 'string') {
         throw new Error('expected string containing public key');
     }
-    if (s.substr(0, 3) === 'EOS') {
+    if (s.substr(0, 3) === prefix) {
         const whole = base58ToBinary(publicKeyDataSize + 4, s.substr(3));
         const key = { type: KeyType.k1, data: new Uint8Array(publicKeyDataSize) };
         for (let i = 0; i < publicKeyDataSize; ++i) {
@@ -308,18 +308,35 @@ export function publicKeyToString(key: Key) {
 /** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
  * Leaves other formats untouched
  */
-export function convertLegacyPublicKey(s: string) {
-    if (s.substr(0, 3) === 'EOS') {
-        return publicKeyToString(stringToPublicKey(s));
+export function convertLegacyPublicKey(s: string, prefix = 'EOS') {
+    if (s.substr(0, 3) === prefix) {
+        return publicKeyToString(stringToPublicKey(s, prefix));
     }
     return s;
+}
+
+/** If a key is in the PUB_K1 format, then convert it to the legacy
+ */
+export function convertK1ToLegacyPublicKey(publicKey: string, prefix = 'EOS') {
+    const K1_PREFIX = 'PUB_K1_'
+
+    if (publicKey.substr(0, K1_PREFIX.length) !== K1_PREFIX) {
+      return publicKey
+    }
+
+    const nonPrefixPublicKey = publicKey.substr(K1_PREFIX.length)
+    const bytesWithChecksum = bs58.decode(nonPrefixPublicKey)
+    const bytes = bytesWithChecksum.slice(0, bytesWithChecksum.length - 4)
+    const suffixBytes = Buffer.from(ripemd160(bytes)).slice(0, 4)
+    const binaryPublicKey = Buffer.from([...bytes, ...suffixBytes])
+    return `${prefix}${bs58.encode(binaryPublicKey)}`
 }
 
 /** If a key is in the legacy format (`EOS` prefix), then convert it to the new format (`PUB_K1_`).
  * Leaves other formats untouched
  */
-export function convertLegacyPublicKeys(keys: string[]) {
-    return keys.map(convertLegacyPublicKey);
+export function convertLegacyPublicKeys(keys: string[], prefix = 'EOS') {
+    return keys.map((key: string) => convertLegacyPublicKey(key, prefix));
 }
 
 /** Convert key in `s` to binary form */

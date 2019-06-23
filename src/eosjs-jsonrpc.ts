@@ -39,6 +39,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     ) {
         this.endpoints = endpoints;
         this.endpoint = endpoint;
+        this.maxRetries = 3
         this.nextEndpoint()
 
         if (args.fetch) {
@@ -76,7 +77,10 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         } catch (e) {
             e.isFetchError = true;
             this.nextEndpoint()
-            return this.fetch(path, body, ++currentRetries)
+            if (currentRetries < this.maxRetries)  {
+                console.log('Retrying at try:' , currentRetries)
+                return this.fetch(path, body, ++currentRetries)
+            }
         }
         if (!response.ok) {
             throw new RpcError(json);
