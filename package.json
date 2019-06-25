@@ -1,6 +1,6 @@
 {
   "name": "@jafri/eosjs2",
-  "version": "20.0.1-e34c16e.127",
+  "version": "20.0.1-e34c16e.134",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {

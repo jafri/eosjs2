@@ -18,11 +18,10 @@ function arrayToHex(data: Uint8Array) {
 
 /** Make RPC calls */
 export class JsonRpc implements AuthorityProvider, AbiProvider {
-    public endpoint: string;
+    public endpoint: string | string[];
     public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
-    public endpoints: string[];
     public endpointIndex: number = -1
-    public maxRetries: number = 5
+    public maxRetries: number = 3
 
     /**
      * @param args
@@ -31,15 +30,12 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      *    * node: provide an implementation
      */
     constructor(
-        endpoint: string,
+        endpoint: string | string[],
         args: { 
-            fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response> 
-        } = {},
-        endpoints?: string[]
+            fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response>
+        } = {}
     ) {
-        this.endpoints = endpoints;
-        this.endpoint = endpoint;
-        this.maxRetries = 3
+        this.endpoint = Array.isArray(endpoint) ? endpoint : [endpoint];
         this.nextEndpoint()
 
         if (args.fetch) {
@@ -50,14 +46,9 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     public nextEndpoint() {
-        /**
-         * TODO add max retries
-         */
-        if (this.endpoints && this.endpoints.length) {
-          this.endpointIndex++
-          this.endpoint = this.endpoints[this.endpointIndex]
-          this.endpointIndex %= this.endpoints.length
-        }
+        this.endpointIndex++
+        this.endpoint = this.endpoint[this.endpointIndex]
+        this.endpointIndex %= this.endpoint.length
     }
 
     /** Post `body` to `endpoint + path`. Throws detailed error information in `RpcError` when available. */
@@ -208,10 +199,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /** Get subset of `availableKeys` needed to meet authorities in `transaction`. Implements `AuthorityProvider` */
     public async getRequiredKeys(args: AuthorityProviderArgs): Promise<string[]> {
-        return convertLegacyPublicKeys((await this.fetch('/v1/chain/get_required_keys', {
+        const { required_keys } = await this.fetch('/v1/chain/get_required_keys', {
             transaction: args.transaction,
-            available_keys: args.availableKeys,
-        })).required_keys);
+            available_keys: args.availableKeys
+        })
+        return convertLegacyPublicKeys(required_keys);
     }
 
     /** Push a serialized transaction */
