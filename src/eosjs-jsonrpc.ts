@@ -18,10 +18,11 @@ function arrayToHex(data: Uint8Array) {
 
 /** Make RPC calls */
 export class JsonRpc implements AuthorityProvider, AbiProvider {
-    public endpoint: string | string[];
+    public endpoints: string[];
     public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
     public endpointIndex: number = -1
     public maxRetries: number = 3
+    public currentEndpoint: string;
 
     /**
      * @param args
@@ -30,12 +31,12 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      *    * node: provide an implementation
      */
     constructor(
-        endpoint: string | string[],
+        endpoints: string | string[],
         args: { 
             fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response>
         } = {}
     ) {
-        this.endpoint = Array.isArray(endpoint) ? endpoint : [endpoint];
+        this.endpoints = Array.isArray(endpoints) ? endpoints : [endpoints];
         this.nextEndpoint()
 
         if (args.fetch) {
@@ -46,9 +47,11 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     public nextEndpoint() {
-        this.endpointIndex++
-        this.endpoint = this.endpoint[this.endpointIndex]
-        this.endpointIndex %= this.endpoint.length
+        if (this.endpoints.length) {
+            this.endpointIndex %= this.endpoints.length + 1
+            this.currentEndpoint = this.endpoints[this.endpointIndex]
+            console.log('Switched to API:', this.currentEndpoint)
+        }
     }
 
     /** Post `body` to `endpoint + path`. Throws detailed error information in `RpcError` when available. */
@@ -57,7 +60,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         let json;
         try {
             const f = this.fetchBuiltin;
-            response = await f(this.endpoint + path, {
+            response = await f(this.currentEndpoint + path, {
                 body: JSON.stringify(body),
                 method: 'POST',
             });
