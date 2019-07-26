@@ -1,4 +1,4 @@
-# eosjs ![npm](https://img.shields.io/npm/dw/eosjs.svg)
+# eosjs ![npm](https://img.shields.io/npm/dw/eosjs-rn.svg)
 
 Javascript API for integration with EOSIO-based blockchains using [EOSIO RPC API](https://developers.eos.io/eosio-nodeos/reference).
 
@@ -8,11 +8,11 @@ Documentation can be found [here](https://eosio.github.io/eosjs)
 
 ### NPM
 
-The official distribution package can be found at [npm](https://www.npmjs.com/package/eosjs).
+The official distribution package can be found at [npm](https://www.npmjs.com/package/eosjs-rn).
 
 ### NodeJS Dependency
 
-`yarn add eosjs`
+`yarn add eosjs-rn`
 
 ### Browser Distribution
 
@@ -24,16 +24,16 @@ Clone this repository locally then run `yarn build-web`.  The browser distributi
 
 Importing using ES6 module syntax in the browser is supported if you have a transpiler, such as Babel.
 ```js
-import { Api, JsonRpc, RpcError } from 'eosjs';
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';           // development only
+import { Api, JsonRpc, RpcError } from 'eosjs-rn';
+import { JsSignatureProvider } from 'eosjs-rn/dist/eosjs-jssig';           // development only
 ```
 
 ### CommonJS
 
 Importing using commonJS syntax is supported by NodeJS out of the box.
 ```js
-const { Api, JsonRpc, RpcError } = require('eosjs');
-const { JsSignatureProvider } = require('eosjs/dist/eosjs-jssig');      // development only
+const { Api, JsonRpc, RpcError } = require('eosjs-rn');
+const { JsSignatureProvider } = require('eosjs-rn/dist/eosjs-jssig');      // development only
 const fetch = require('node-fetch');                                    // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require('util');                   // node only; native TextEncoder/Decoder
 const { TextEncoder, TextDecoder } = require('text-encoding');          // React Native, IE11, and Edge Browsers only
