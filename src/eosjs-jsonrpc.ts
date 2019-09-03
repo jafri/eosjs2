@@ -20,8 +20,7 @@ function arrayToHex(data: Uint8Array) {
 export class JsonRpc implements AuthorityProvider, AbiProvider {
     public endpoints: string[];
     public fetchBuiltin: (input?: Request | string, init?: RequestInit) => Promise<Response>;
-    public endpointIndex: number = -1
-    public maxRetries: number = 3
+    public maxRetries: number = 3;
     public currentEndpoint: string;
 
     /**
@@ -32,12 +31,12 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
      */
     constructor(
         endpoints: string | string[],
-        args: { 
+        args: {
             fetch?: (input?: string | Request, init?: RequestInit) => Promise<Response>
         } = {}
     ) {
         this.endpoints = Array.isArray(endpoints) ? endpoints : [endpoints];
-        this.nextEndpoint()
+        this.nextEndpoint();
 
         if (args.fetch) {
             this.fetchBuiltin = args.fetch;
@@ -48,9 +47,13 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     public nextEndpoint() {
         if (this.endpoints.length) {
-            this.endpointIndex %= this.endpoints.length + 1
-            this.currentEndpoint = this.endpoints[this.endpointIndex]
-            console.log('Switched to API:', this.currentEndpoint)
+            if (this.currentEndpoint) {
+                const removed = this.endpoints.shift();
+                this.endpoints = this.endpoints.concat(removed || []);
+            }
+
+            this.currentEndpoint = this.endpoints[0];
+            console.log('Switched to API:', this.currentEndpoint);
         }
     }
 
