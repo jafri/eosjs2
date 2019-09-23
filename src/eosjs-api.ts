@@ -3,9 +3,21 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-import { AbiProvider, AuthorityProvider, BinaryAbi, CachedAbi, SignatureProvider } from './eosjs-api-interfaces';
+import {
+    AbiProvider,
+    AuthorityProvider,
+    BinaryAbi,
+    CachedAbi,
+    SignatureProvider
+} from './eosjs-api-interfaces';
 import { JsonRpc } from './eosjs-jsonrpc';
-import { Abi, GetInfoResult, PushTransactionArgs } from './eosjs-rpc-interfaces';
+import {
+    Abi,
+    GetInfoResult,
+    PushTransactionArgs,
+    GetBlockHeaderStateResult,
+    GetBlockResult
+} from './eosjs-rpc-interfaces';
 import * as ser from './eosjs-serialize';
 
 const abiAbi = require('../src/abi.abi.json');
@@ -241,7 +253,15 @@ export class Api {
             if (!info) {
                 info = await this.rpc.get_info();
             }
-            const refBlock = await this.rpc.get_block(info.head_block_num - blocksBehind);
+
+            const taposBlockNumber = info.head_block_num - blocksBehind;
+            let refBlock: GetBlockHeaderStateResult | GetBlockResult;
+            try {
+                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+            } catch (error) {
+                refBlock = await this.rpc.get_block(taposBlockNumber);
+            }
+
             transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
 
@@ -290,8 +310,8 @@ export class Api {
     }
 
     // eventually break out into TransactionValidator class
-    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix, ...transaction }: any): boolean {
-        return !!(expiration && ref_block_num && ref_block_prefix);
+    private hasRequiredTaposFields({ expiration, ref_block_num, ref_block_prefix }: any): boolean {
+        return !!(expiration && typeof(ref_block_num) === 'number' && typeof(ref_block_prefix) === 'number');
     }
 
 } // Api
