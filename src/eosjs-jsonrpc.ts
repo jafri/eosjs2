@@ -45,6 +45,17 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         }
     }
 
+    fetchWithTimeout (url: string, options: any, timeout = 6000): any {
+        const f = this.fetchBuiltin;
+
+        return Promise.race([
+            f(url, options),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('timeout')), timeout)
+            )
+        ]);
+    }
+
     public nextEndpoint() {
         if (this.endpoints.length) {
             if (this.currentEndpoint) {
@@ -62,8 +73,7 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         let response;
         let json;
         try {
-            const f = this.fetchBuiltin;
-            response = await f(this.currentEndpoint + path, {
+            response = await this.fetchWithTimeout(this.currentEndpoint + path, {
                 body: JSON.stringify(body),
                 method: 'POST',
             });
@@ -72,16 +82,40 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
                 throw new RpcError(json);
             }
         } catch (e) {
+            console.log('Error from', this.currentEndpoint, e)
+
             e.isFetchError = true;
-            this.nextEndpoint()
-            if (currentRetries < this.maxRetries)  {
-                console.log('Retrying at try:' , currentRetries)
-                return this.fetch(path, body, ++currentRetries)
+
+            if (this.endpoints.length > 1) {
+                this.nextEndpoint()
+                if (currentRetries < this.maxRetries)  {
+                    console.log('Retrying at try:' , currentRetries)
+                    return this.fetch(path, body, ++currentRetries)
+                }
             }
         }
         if (!response.ok) {
             throw new RpcError(json);
         }
+
+        // Check for synced
+        if (json && json.head_block_time) {
+            const headTime = new Date(json.head_block_time + 'Z').getTime()
+            const ct = new Date().getTime()
+            const secondsBehind = (ct - headTime) / 1000
+
+            if (secondsBehind > 20 && this.endpoints.length > 1) {
+                console.log('API is SYNCING (behind)', this.currentEndpoint)
+                console.log(`Current Time: ${ct}, Head Time: ${headTime}, Seconds Behind: ${secondsBehind}`)
+
+                this.nextEndpoint()
+                if (currentRetries < this.maxRetries)  {
+                    console.log('Retrying at try:' , currentRetries)
+                    return this.fetch(path, body, ++currentRetries)
+                }
+            }
+        }
+
         return json;
     }
 
