@@ -251,12 +251,21 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     public async push_transaction(
         { signatures, serializedTransaction, serializedContextFreeData }: PushTransactionArgs
     ): Promise<any> {
-        return await this.fetch('/v1/chain/push_transaction', {
-            signatures,
-            compression: 0,
-            packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
-            packed_trx: arrayToHex(serializedTransaction),
-        });
+        try {
+            return await this.fetch('/v1/chain/push_transaction', {
+                signatures,
+                compression: 0,
+                packed_context_free_data: arrayToHex(serializedContextFreeData || new Uint8Array(0)),
+                packed_trx: arrayToHex(serializedTransaction),
+            });
+        } catch (e) {
+            const expired = e.json.error.name === 'expired_tx_exception'
+            if (expired) {
+                e.json.error.message = 'Transaction Expired: Try Again'
+                this.nextEndpoint()
+            }
+            throw e
+        }
     }
 
     /** Send a serialized transaction */
