@@ -3,8 +3,10 @@
  */
 // copyright defined in eosjs/LICENSE.txt
 
-const ripemd160 = require('./ripemd').RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
-const bs58 = require('bs58')
+import RIPEMD160 from 'ripemd-ts'
+import bs58 from 'bs58'
+
+const ripemd160 = RIPEMD160.hash as (a: Uint8Array) => ArrayBuffer;
 const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
