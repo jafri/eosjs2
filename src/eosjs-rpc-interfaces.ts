@@ -107,6 +107,22 @@ export interface GetInfoResult {
     block_net_limit: number;
 }
 
+
+/** Return value of `/v1/chain/get_activated_protocol_features` */
+export interface Specification {
+    name:  string;
+    value: string;
+}
+export interface GetActivatedProtocolFeaturesResult {
+    feature_digest:        string;
+    activation_ordinal:    number;
+    activation_block_num:  number;
+    description_digest:    string;
+    dependencies:          any[];
+    protocol_feature_type: string;
+    specification:         Specification[];
+}
+
 /** Return value of `/v1/chain/get_raw_code_and_abi` */
 export interface GetRawCodeAndAbiResult {
     account_name: string;
