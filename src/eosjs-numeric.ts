@@ -405,6 +405,8 @@ export function stringToPrivateKey(s: string): Key {
 export function privateKeyToString(key: Key) {
     if (key.type === KeyType.r1) {
         return keyToString(key, 'R1', 'PVT_R1_');
+    } else if (key.type === KeyType.k1) {
+        return keyToString(key, 'K1', 'PVT_K1_');
     } else {
         throw new Error('unrecognized private key format');
     }
