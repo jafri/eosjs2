@@ -240,41 +240,50 @@ export class Api {
      *      use it as a reference for TAPoS, and expire the transaction `expireSeconds` after that block's time.
      * @returns node response if `broadcast`, `{signatures, serializedTransaction}` if `!broadcast`
      */
-    public async transact(transaction: any, { broadcast = true, sign = true, blocksBehind, expireSeconds }:
-        { broadcast?: boolean; sign?: boolean; blocksBehind?: number; expireSeconds?: number; } = {}): Promise<any> {
-        let info: GetInfoResult;
+    public async transact(transaction: any, {
+        broadcast = true,
+        sign = true,
+        requiredKeys, // When you will sign later
+        blocksBehind,
+        expireSeconds,
+        transactionHeader = undefined
+    }: {
+        broadcast?: boolean;
+        sign?: boolean;
+        requiredKeys?: string[],
+        blocksBehind?: number;
+        expireSeconds?: number;
+        transactionHeader?: any;
+    } = {}): Promise<any> {
+        let info: GetInfoResult = await this.rpc.get_info();;
+        this.chainId = info.chain_id;
 
-        if (!this.chainId) {
-            info = await this.rpc.get_info();
-            this.chainId = info.chain_id;
-        }
+        // Calculate header
+        if (!transactionHeader) {
+            if (typeof blocksBehind === 'number' && expireSeconds) { // use config fields to generate TAPOS if they exist
+                const taposBlockNumber = info.head_block_num - blocksBehind;
+                let refBlock: GetBlockHeaderStateResult | GetBlockResult;
+                try {
+                    refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
+                } catch (error) {
+                    refBlock = await this.rpc.get_block(taposBlockNumber);
+                }
 
-        if (typeof blocksBehind === 'number' && expireSeconds) { // use config fields to generate TAPOS if they exist
-            if (!info) {
-                info = await this.rpc.get_info();
+                transactionHeader = ser.transactionHeader(refBlock, expireSeconds);
             }
 
-            const taposBlockNumber = info.head_block_num - blocksBehind;
-            let refBlock: GetBlockHeaderStateResult | GetBlockResult;
-            try {
-                refBlock = await this.rpc.get_block_header_state(taposBlockNumber);
-            } catch (error) {
-                refBlock = await this.rpc.get_block(taposBlockNumber);
+            if (!this.hasRequiredTaposFields(transactionHeader)) {
+                throw new Error('Required configuration or TAPOS fields are not present');
             }
-
-            transaction = { ...ser.transactionHeader(refBlock, expireSeconds), ...transaction };
         }
 
-        if (!this.hasRequiredTaposFields(transaction)) {
-            throw new Error('Required configuration or TAPOS fields are not present');
-        }
-
-        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         transaction = {
-            ...transaction,
+            ...transactionHeader,
             context_free_actions: await this.serializeActions(transaction.context_free_actions || []),
             actions: await this.serializeActions(transaction.actions)
         };
+
+        const abis: BinaryAbi[] = await this.getTransactionAbis(transaction);
         const serializedTransaction = this.serializeTransaction(transaction);
         const serializedContextFreeData = this.serializeContextFreeData(transaction.context_free_data);
         let pushTransactionArgs: PushTransactionArgs = {
@@ -283,19 +292,33 @@ export class Api {
 
         if (sign) {
             const availableKeys = await this.signatureProvider.getAvailableKeys();
-            const requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+
+            if (!requiredKeys) {
+                requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
+            }
+
+            console.log('TX', {
+                chainId: this.chainId,
+                requiredKeys,
+                serializedTransaction,
+                serializedContextFreeData,
+                abis
+            })
             pushTransactionArgs = await this.signatureProvider.sign({
                 chainId: this.chainId,
                 requiredKeys,
                 serializedTransaction,
                 serializedContextFreeData,
-                abis,
+                abis
             });
         }
         if (broadcast) {
             return this.pushSignedTransaction(pushTransactionArgs);
         }
-        return pushTransactionArgs;
+        return {
+            ...pushTransactionArgs,
+            transactionHeader //
+        };
     }
 
     /** Broadcast a signed transaction */

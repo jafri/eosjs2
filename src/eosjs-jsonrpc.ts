@@ -189,8 +189,8 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
     }
 
     /** Raw call to `/v1/chain/get_activated_protocol_features` */
-    public async get_activated_protocol_features(): Promise<GetActivatedProtocolFeaturesResult> {
-        return await this.fetch('/v1/chain/get_activated_protocol_features', {});
+    public async get_activated_protocol_features(limit = 100): Promise<GetActivatedProtocolFeaturesResult> {
+        return await this.fetch('/v1/chain/get_activated_protocol_features', { limit });
     }
 
     /** Raw call to `/v1/chain/get_table_rows` */

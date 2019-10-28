@@ -63,6 +63,8 @@ export class JsSignatureProvider implements SignatureProvider {
         const signatures = [] as string[];
         for (const key of requiredKeys) {
             const privKey = this.keys.get(convertLegacyPublicKey(key)) as any;
+            if (!privKey) continue
+
             let tries = 0;
             let sigData: Uint8Array;
             const isCanonical = () =>
