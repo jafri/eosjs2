@@ -1,6 +1,9 @@
-// copyright defined in eosjs/LICENSE.txt
+/**
+ * @module RPC-API-Methods
+ * copyright defined in eosjs/LICENSE.txt
+ */
 
-/** Structured format for abis */
+ /** Structured format for abis */
 export interface Abi {
     version: string;
     types: Array<{ new_type_name: string, type: string }>;
