@@ -5,7 +5,7 @@
 
 import { AbiProvider, AuthorityProvider, AuthorityProviderArgs, BinaryAbi } from './eosjs-api-interfaces';
 import { base64ToBinary, convertLegacyPublicKeys } from './eosjs-numeric';
-import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, GetBlockHeaderStateResult, GetActivatedProtocolFeaturesResult } from "./eosjs-rpc-interfaces" // tslint:disable-line
+import { GetAbiResult, GetBlockResult, GetCodeResult, GetInfoResult, GetRawCodeAndAbiResult, PushTransactionArgs, GetBlockHeaderStateResult, GetActivatedProtocolFeaturesResult, GetRawAbiResult } from "./eosjs-rpc-interfaces" // tslint:disable-line
 import { RpcError } from './eosjs-rpcerror';
 
 function arrayToHex(data: Uint8Array) {
@@ -175,10 +175,14 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
         return await this.fetch('/v1/chain/get_raw_code_and_abi', { account_name: accountName });
     }
 
-    /** calls `/v1/chain/get_raw_code_and_abi` and pulls out unneeded raw wasm code */
-    // TODO: use `/v1/chain/get_raw_abi` directly when it becomes available
+    /** Raw call to `/v1/chain/get_raw_abi` */
+    public async get_raw_abi(accountName: string): Promise<GetRawAbiResult> {
+        return await this.fetch('/v1/chain/get_raw_abi', { account_name: accountName });
+    }
+
+    /** calls `/v1/chain/get_raw_abi` and pulls out unneeded raw wasm code */
     public async getRawAbi(accountName: string): Promise<BinaryAbi> {
-        const rawCodeAndAbi = await this.get_raw_code_and_abi(accountName);
+        const rawCodeAndAbi = await this.get_raw_abi(accountName);
         const abi = base64ToBinary(rawCodeAndAbi.abi);
         return { accountName: rawCodeAndAbi.account_name, abi };
     }

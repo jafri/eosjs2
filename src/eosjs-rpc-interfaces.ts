@@ -130,6 +130,14 @@ export interface GetRawCodeAndAbiResult {
     abi: string;
 }
 
+/** Return value of `/v1/chain/get_raw_abi` */
+export interface GetRawAbiResult {
+    account_name: string;
+    code_hash: string;
+    abi_hash: string;
+    abi: string;
+}
+
 /** Arguments for `push_transaction` */
 export interface PushTransactionArgs {
     signatures?: string[];

@@ -216,14 +216,27 @@ export class Api {
         }));
     }
 
+    public async deserializeActionsSync(actions: ser.Action[]): Promise<ser.Action[]> {
+        let deserializedActions = []
+        for (const { account, name, authorization, data } of actions) {
+            const contract = await this.getContract(account);
+            deserializedActions.push(
+                ser.deserializeAction(
+                    contract, account, name, authorization, data, this.textEncoder, this.textDecoder
+                )
+            )
+        }
+        return deserializedActions
+    }
+
     /** Convert a transaction from binary. Also deserializes actions. */
     public async deserializeTransactionWithActions(transaction: Uint8Array | string): Promise<any> {
         if (typeof transaction === 'string') {
             transaction = ser.hexToUint8Array(transaction);
         }
         const deserializedTransaction = this.deserializeTransaction(transaction);
-        const deserializedCFActions = await this.deserializeActions(deserializedTransaction.context_free_actions);
-        const deserializedActions = await this.deserializeActions(deserializedTransaction.actions);
+        const deserializedCFActions = await this.deserializeActionsSync(deserializedTransaction.context_free_actions);
+        const deserializedActions = await this.deserializeActionsSync(deserializedTransaction.actions);
         return {
             ...deserializedTransaction, context_free_actions: deserializedCFActions, actions: deserializedActions
         };
@@ -297,13 +310,6 @@ export class Api {
                 requiredKeys = await this.authorityProvider.getRequiredKeys({ transaction, availableKeys });
             }
 
-            console.log('TX', {
-                chainId: this.chainId,
-                requiredKeys,
-                serializedTransaction,
-                serializedContextFreeData,
-                abis
-            })
             pushTransactionArgs = await this.signatureProvider.sign({
                 chainId: this.chainId,
                 requiredKeys,
