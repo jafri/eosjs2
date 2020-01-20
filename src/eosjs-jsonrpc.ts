@@ -92,6 +92,8 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
                 if (currentRetries < this.maxRetries)  {
                     console.log('Retrying at try:' , currentRetries)
                     return this.fetch(path, body, ++currentRetries)
+                } else {
+                    throw e;
                 }
             }
         }
@@ -142,7 +144,10 @@ export class JsonRpc implements AuthorityProvider, AbiProvider {
 
     /** Raw call to `/v1/chain/get_code` */
     public async get_code(accountName: string): Promise<GetCodeResult> {
-        return await this.fetch('/v1/chain/get_code', { account_name: accountName });
+        return await this.fetch('/v1/chain/get_code', {
+            account_name: accountName,
+            code_as_wasm: true
+        });
     }
 
     /** Raw call to `/v1/chain/get_currency_balance` */
