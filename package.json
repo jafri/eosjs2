@@ -1,6 +1,6 @@
 {
   "name": "@jafri/eosjs2",
-  "version": "20.0.1-e34c16e.183",
+  "version": "21.0.0-rc.008",
   "description": "Talk to eos API",
   "main": "dist/index.js",
   "scripts": {
@@ -25,28 +25,28 @@
   "license": "MIT",
   "dependencies": {
     "bs58": "^4.0.1",
-    "ripemd-ts": "0.0.1"
+    "ripemd-ts": "0.0.1",
+    "elliptic": "^6.5.2"
   },
   "devDependencies": {
-    "babel-runtime": "6.26.0",
     "@blockone/tslint-config-blockone": "3.0.0",
     "@types/bs58": "^4.0.0",
     "@types/elliptic": "^6.4.9",
     "@types/jest": "24.0.6",
     "@types/node": "11.9.4",
     "@types/text-encoding": "0.0.35",
-    "text-encoding": "0.7.0",
     "babel-cli": "6.26.0",
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-preset-env": "1.7.0",
     "babel-preset-stage-1": "6.24.1",
+    "babel-runtime": "6.26.0",
     "cypress": "3.1.5",
-    "elliptic": "^6.5.0",
     "jest": "23.5.0",
     "jest-fetch-mock": "2.1.1",
     "json-loader": "0.5.7",
     "mocha": "5.2.0",
     "mochawesome": "3.1.1",
+    "text-encoding": "0.7.0",
     "ts-jest": "24.0.0",
     "ts-loader": "5.3.3",
     "tslint": "5.12.1",

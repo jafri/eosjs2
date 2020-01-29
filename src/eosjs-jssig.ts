@@ -81,6 +81,7 @@ class JsSignatureProvider implements SignatureProvider {
                 !(sigData[1] & 0x80) && !(sigData[1] === 0 && !(sigData[2] & 0x80))
                 && !(sigData[33] & 0x80) && !(sigData[33] === 0 && !(sigData[34] & 0x80));
 
+
             do {
                 const ellipticSig = privKey.sign(digest, { canonical: true, pers: [++tries] });
                 sig = Signature.fromElliptic(ellipticSig, publicKey.getType());

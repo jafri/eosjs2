@@ -20,8 +20,15 @@ export class Signature {
 
     /** Instantiate Signature from an `elliptic`-format Signature */
     public static fromElliptic(ellipticSig: ec.Signature, keyType: KeyType): Signature {
-        const r = ellipticSig.r.toArray();
-        const s = ellipticSig.s.toArray();
+        let r = ellipticSig.r.toArray();
+        let s = ellipticSig.s.toArray();
+        if (r.length < 32) {
+            r = new Array(32 - r.length).fill(0).concat(r);
+        }
+        if (s.length < 32) {
+            s = new Array(32 - s.length).fill(0).concat(s);
+        }
+
         let eosioRecoveryParam;
         if (keyType === KeyType.k1) {
             eosioRecoveryParam = ellipticSig.recoveryParam + 27;
